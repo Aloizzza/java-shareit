@@ -3,7 +3,6 @@ package ru.practicum.shareit.user.dao;
 import lombok.Getter;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.AlreadyExistsException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
@@ -13,30 +12,24 @@ import java.util.Optional;
 
 @Repository
 @Getter
-public class InMemoryUserStorage {
+public class InMemoryUserStorage implements UserStorage {
 
     private HashMap<Long, User> users = new HashMap<>();
     private long uniqueId = 1;
 
-    public Optional<User> getById(long id) {
+    public Optional<User> findById(long id) {
         if (!users.containsKey(id)) {
-            throw new NotFoundException("пользователь c идентификатором " + id + " не существует");
+            return Optional.empty();
         }
         return Optional.of(users.get(id));
     }
 
-    public List<User> getAll() {
+    public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 
     public User add(User user) {
-        String email = user.getEmail();
-        for (User u : users.values()) {
-            if (u.getEmail().equals(email)) {
-                throw new AlreadyExistsException("почта " + email + " уже занята другим пользователем");
-            }
-        }
-        user.setId(getUniqueId());
+        user.setId(getId());
         users.put(user.getId(), user);
         return user;
     }
@@ -62,7 +55,7 @@ public class InMemoryUserStorage {
         users.remove(id);
     }
 
-    public long getUniqueId() {
+    private long getId() {
         return uniqueId++;
     }
 }

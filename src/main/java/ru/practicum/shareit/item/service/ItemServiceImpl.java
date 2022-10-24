@@ -1,43 +1,36 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dao.ItemStorage;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.dao.InMemoryItemStorage;
-import ru.practicum.shareit.user.dao.InMemoryUserStorage;
+import ru.practicum.shareit.user.dao.UserStorage;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private final InMemoryItemStorage inMemoryItem;
-    private final InMemoryUserStorage inMemoryUser;
+    private final ItemStorage inMemoryItem;
+    private final UserStorage inMemoryUser;
 
     public ItemDto getById(long itemId) {
-        Optional<Item> item = inMemoryItem.getById(itemId);
-        if (item.isEmpty()) {
-            log.error("вещь c идентификатором " + itemId + " не существует");
-            throw new NotFoundException("вещь c идентификатором " + itemId + " не существует");
-        }
-        return ItemMapper.toItemDto(item.get());
+        return ItemMapper.toItemDto(inMemoryItem.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("вещь c идентификатором " + itemId + " не существует")));
     }
 
     public List<ItemDto> getAll(long userId) {
-        Optional<User> user = inMemoryUser.getById(userId);
+        Optional<User> user = inMemoryUser.findById(userId);
         if (user.isEmpty()) {
-            log.error("пользователь c идентификатором " + userId + " не существует");
             throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
         }
-        return inMemoryItem.getAll()
+        return inMemoryItem.findAll()
                 .stream()
                 .filter(item -> item.getOwner().getId() == userId)
                 .map(ItemMapper::toItemDto)
@@ -53,9 +46,8 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemDto create(ItemDto itemDto, long userId) {
         Item item = ItemMapper.toItem(itemDto);
-        Optional<User> user = inMemoryUser.getById(userId);
+        Optional<User> user = inMemoryUser.findById(userId);
         if (user.isEmpty()) {
-            log.error("пользователь c идентификатором " + userId + " не существует");
             throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
         }
         item.setOwner(user.get());
@@ -63,16 +55,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDto update(ItemDto itemDto, long itemId, long userId) {
-        Item item = ItemMapper.toItem(itemDto);
-        Optional<User> user = inMemoryUser.getById(userId);
-        if (user.isEmpty()) {
-            log.error("пользователь c идентификатором " + userId + " не существует");
-            throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
+        Item item = inMemoryItem.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("вещь c идентификатором " + itemId + " не существует"));
+        if (item.getOwner().getId() != userId) {
+            throw new NotFoundException("вещь принадлежит другому пользователю");
         }
-        if (inMemoryItem.getById(itemId).get().getOwner().getId() != userId) {
-            log.error("неверный пользователь");
-            throw new NotFoundException("неверный пользователь");
+        if (itemDto.getName() != null) {
+            item.setName(itemDto.getName());
         }
-        return ItemMapper.toItemDto(inMemoryItem.update(item, itemId));
+        if (itemDto.getDescription() != null) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
+        inMemoryItem.update(item, itemId);
+        return ItemMapper.toItemDto(item);
     }
 }

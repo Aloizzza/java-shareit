@@ -1,0 +1,28 @@
+logging:
+    level:
+        org:
+            springframework:
+                orm:
+                    jpa: INFO
+                    jpa.JpaTransactionManager: DEBUG
+                transaction: INFO
+                transaction.interceptor: TRACE
+spring:
+    config:
+        activate:
+            on-profile: ci,test
+    datasource:
+        driverClassName: org.h2.Driver
+        password: test
+        url: jdbc:h2:mem:shareit
+        username: test
+    jpa:
+        hibernate:
+            ddl-auto: none
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQL10Dialect
+                format_sql: true
+    sql:
+        init:
+            mode: always

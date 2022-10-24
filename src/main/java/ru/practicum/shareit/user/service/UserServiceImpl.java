@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dao.InMemoryUserStorage;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -13,34 +13,35 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final InMemoryUserStorage inMemoryUser;
 
     public UserDto getById(long userId) {
-        Optional<User> user = inMemoryUser.getById(userId);
-        if (user.isEmpty()) {
-            log.error("пользователь c идентификатором " + userId + " не существует");
-            throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
-        }
-        return UserMapper.toUserDto(user.get());
+        return UserMapper.toUserDto(inMemoryUser.findById(userId)
+                .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует")));
     }
 
     public List<UserDto> getAll() {
-        return inMemoryUser.getAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return inMemoryUser.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     public UserDto add(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
+        for (User u : inMemoryUser.findAll()) {
+            if (u.getEmail().equals(user.getEmail())) {
+                throw new AlreadyExistsException("почта " + user.getEmail() + " уже занята другим пользователем");
+            }
+        }
         return UserMapper.toUserDto(inMemoryUser.add(user));
     }
 
     public UserDto update(UserDto userDto, long userId) {
-        Optional<User> userToUpdate = inMemoryUser.getById(userId);
+        Optional<User> userToUpdate = inMemoryUser.findById(userId);
         if (userToUpdate.isEmpty()) {
-            log.error("пользователь c идентификатором " + userId + " не существует");
             throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
         }
         User user = UserMapper.toUser(userDto);

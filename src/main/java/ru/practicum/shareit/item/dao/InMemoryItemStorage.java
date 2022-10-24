@@ -12,15 +12,18 @@ import java.util.*;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class InMemoryItemStorage {
+public class InMemoryItemStorage implements ItemStorage {
     private final Map<Long, Item> items = new HashMap<>();
     private long id = 1;
 
-    public Optional<Item> getById(long id) {
+    public Optional<Item> findById(long id) {
+        if (!items.containsKey(id)) {
+            return Optional.empty();
+        }
         return Optional.of(items.get(id));
     }
 
-    public List<Item> getAll() {
+    public List<Item> findAll() {
         return new ArrayList<>(items.values());
     }
 
@@ -48,18 +51,8 @@ public class InMemoryItemStorage {
     }
 
     public Item update(Item item, long id) {
-        Item itemUpdate = items.get(id);
-        if (item.getName() != null) {
-            itemUpdate.setName(item.getName());
-        }
-        if (item.getDescription() != null) {
-            itemUpdate.setDescription(item.getDescription());
-        }
-        if (item.getAvailable() != null) {
-            itemUpdate.setAvailable(item.getAvailable());
-        }
-        items.put(id, itemUpdate);
-        return itemUpdate;
+        items.put(id, item);
+        return items.get(id);
     }
 
     private long getId() {
