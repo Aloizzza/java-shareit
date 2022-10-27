@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.dao;
 
 import lombok.Getter;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(id)) {
             return Optional.empty();
         }
+
         return Optional.of(users.get(id));
     }
 
@@ -31,16 +31,11 @@ public class InMemoryUserStorage implements UserStorage {
     public User add(User user) {
         user.setId(getId());
         users.put(user.getId(), user);
+
         return user;
     }
 
     public User update(User user, long id) {
-        String email = user.getEmail();
-        for (User u : users.values()) {
-            if (u.getEmail().equals(email)) {
-                throw new AlreadyExistsException("почта " + email + " уже занята другим пользователем");
-            }
-        }
         User userUpdate = users.get(id);
         if (user.getEmail() != null) {
             userUpdate.setEmail(user.getEmail());
@@ -48,6 +43,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (user.getName() != null) {
             userUpdate.setName(user.getName());
         }
+
         return userUpdate;
     }
 

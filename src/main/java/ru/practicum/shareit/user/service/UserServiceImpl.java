@@ -19,8 +19,10 @@ public class UserServiceImpl implements UserService {
     private final InMemoryUserStorage inMemoryUser;
 
     public UserDto getById(long userId) {
-        return UserMapper.toUserDto(inMemoryUser.findById(userId)
-                .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует")));
+        User user = inMemoryUser.findById(userId)
+                .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует"));
+
+        return UserMapper.toUserDto(user);
     }
 
     public List<UserDto> getAll() {
@@ -36,15 +38,22 @@ public class UserServiceImpl implements UserService {
                 throw new AlreadyExistsException("почта " + user.getEmail() + " уже занята другим пользователем");
             }
         }
+
         return UserMapper.toUserDto(inMemoryUser.add(user));
     }
 
     public UserDto update(UserDto userDto, long userId) {
         Optional<User> userToUpdate = inMemoryUser.findById(userId);
+        User user = UserMapper.toUser(userDto);
         if (userToUpdate.isEmpty()) {
             throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
         }
-        User user = UserMapper.toUser(userDto);
+        for (User u : inMemoryUser.findAll()) {
+            if (u.getEmail().equals(user.getEmail())) {
+                throw new AlreadyExistsException("почта " + user.getEmail() + " уже занята другим пользователем");
+            }
+        }
+
         return UserMapper.toUserDto(inMemoryUser.update(user, userId));
     }
 

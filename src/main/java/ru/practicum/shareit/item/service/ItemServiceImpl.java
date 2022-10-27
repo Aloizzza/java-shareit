@@ -21,8 +21,10 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage inMemoryUser;
 
     public ItemDto getById(long itemId) {
-        return ItemMapper.toItemDto(inMemoryItem.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("вещь c идентификатором " + itemId + " не существует")));
+        Item item = inMemoryItem.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("вещь c идентификатором " + itemId + " не существует"));
+
+        return ItemMapper.toItemDto(item);
     }
 
     public List<ItemDto> getAll(long userId) {
@@ -30,6 +32,7 @@ public class ItemServiceImpl implements ItemService {
         if (user.isEmpty()) {
             throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
         }
+
         return inMemoryItem.findAll()
                 .stream()
                 .filter(item -> item.getOwner().getId() == userId)
@@ -51,6 +54,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("пользователь c идентификатором " + userId + " не существует");
         }
         item.setOwner(user.get());
+
         return ItemMapper.toItemDto(inMemoryItem.create(item));
     }
 
@@ -70,6 +74,7 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(itemDto.getAvailable());
         }
         inMemoryItem.update(item, itemId);
+
         return ItemMapper.toItemDto(item);
     }
 }
