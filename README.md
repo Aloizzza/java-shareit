@@ -1,2 +1,16 @@
-# java-shareit
-Template repository for Shareit project.
+## Это репозиторий финального проекта 13 спринта "Проект ShareIt"
+
+Наше приложение **умеет**:
+1. Создан каркас WEB-приложения
+
+Это сквозной проект, являющийся заготовкой для последующих проектов.
+
+Приложение написано на Java. Пример кода:
+```java
+public class Practicum {
+    public static void main(String[] args) {
+    }
+}
+```
+------
+О том, как научиться создавать такие приложения, можно узнать в [Яндекс-Практикуме](https://practicum.yandex.ru/java-developer/ "Тут учат Java!")
