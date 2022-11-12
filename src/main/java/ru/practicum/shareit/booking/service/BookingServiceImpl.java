@@ -51,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto approve(long userId, long bookingId, boolean status) {
         userRepository.findById(userId)
-                .orElseThrow(()-> new NotFoundException("пользователь c идентификатором " + userId + " не существует"));
+                .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует"));
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("указанное бронирование не существует"));
         if (booking.getItem().getOwner().getId() != userId) {
@@ -67,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getById(long bookingId, long userId) {
         userRepository.findById(userId)
-                .orElseThrow(()-> new NotFoundException("пользователь c идентификатором " + userId + " не существует"));
+                .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует"));
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("указанное бронирование не существует"));
         long id = booking.getItem().getId();
@@ -84,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findAllForBooker(long bookerId, String state) {
         userRepository.findById(bookerId)
-                .orElseThrow(()-> new NotFoundException("пользователь c идентификатором " + bookerId + " не существует"));
+                .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + bookerId + " не существует"));
         return findBookings(bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId), state).stream()
                 .map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
@@ -92,7 +92,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findAllForOwner(long ownerId, String state) {
         userRepository.findById(ownerId)
-                .orElseThrow(()-> new NotFoundException("пользователь c идентификатором " + ownerId + " не существует"));
+                .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + ownerId + " не существует"));
         if (itemRepository.findAllByOwnerId(ownerId).isEmpty()) {
             throw new BadRequest("у вас нет вещей");
         }
