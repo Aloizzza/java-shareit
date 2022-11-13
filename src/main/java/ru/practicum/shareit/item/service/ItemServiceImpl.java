@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.BadRequest;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.mapper.CommentMapper;
@@ -39,12 +39,12 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("вещь c идентификатором " + itemId + " не существует"));
 
-        Booking lastBooking = bookingRepository.findAllByItemIdAndItemOwnerIdAndStartBefore(item.getId(), userId, LocalDateTime.now())
+        Booking lastBooking = bookingRepository.findPastOwnerBookings(item.getId(), userId, LocalDateTime.now())
                 .stream()
                 .min(Comparator.comparing(Booking::getEnd))
                 .orElse(null);
 
-        Booking nextBooking = bookingRepository.findAllByItemIdAndItemOwnerIdAndStartAfter(item.getId(), userId, LocalDateTime.now())
+        Booking nextBooking = bookingRepository.findFutureOwnerBookings(item.getId(), userId, LocalDateTime.now())
                 .stream()
                 .max(Comparator.comparing(Booking::getStart))
                 .orElse(null);
@@ -65,12 +65,12 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
-            Booking lastBooking = bookingRepository.findAllByItemIdAndStartBefore(item.getId(), LocalDateTime.now())
+            Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
                     .stream()
                     .min(Comparator.comparing(Booking::getEnd))
                     .orElse(null);
 
-            Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfter(item.getId(), LocalDateTime.now())
+            Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
                     .stream()
                     .max(Comparator.comparing(Booking::getStart))
                     .orElse(null);
@@ -91,17 +91,17 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
 
-        List<Item> items = itemRepository.findAllByNameContainsIgnoreCaseOrDescriptionContainsIgnoreCaseAndAvailableIsTrue(text, text);
+        List<Item> items = itemRepository.search(text, text);
 
         List<ItemDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
-            Booking lastBooking = bookingRepository.findAllByItemIdAndStartBefore(item.getId(), LocalDateTime.now())
+            Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
                     .stream()
                     .min(Comparator.comparing(Booking::getEnd))
                     .orElse(null);
 
-            Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfter(item.getId(), LocalDateTime.now())
+            Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
                     .stream()
                     .max(Comparator.comparing(Booking::getStart))
                     .orElse(null);
@@ -145,12 +145,12 @@ public class ItemServiceImpl implements ItemService {
         }
         itemRepository.save(item);
 
-        Booking lastBooking = bookingRepository.findAllByItemIdAndStartBefore(item.getId(), LocalDateTime.now())
+        Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
                 .stream()
                 .min(Comparator.comparing(Booking::getEnd))
                 .orElse(null);
 
-        Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfter(item.getId(), LocalDateTime.now())
+        Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
                 .stream()
                 .max(Comparator.comparing(Booking::getStart))
                 .orElse(null);
@@ -165,15 +165,13 @@ public class ItemServiceImpl implements ItemService {
 
     public CommentDto createComment(CommentDto commentDto, long itemId, long userId) {
         if (commentDto.getText().isEmpty() || commentDto.getText().isBlank()) {
-            throw new BadRequest("отзыв не может быть пустым");
+            throw new BadRequestException("отзыв не может быть пустым");
         }
 
         Long bookingsCount = bookingRepository.countAllByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
 
-        System.out.println("bookingsCount=" + bookingsCount);
-
         if (bookingsCount == null || bookingsCount == 0) {
-            throw new BadRequest("вы еще ни разу не брали эту вещь");
+            throw new BadRequestException("вы еще ни разу не брали эту вещь");
         }
 
         Item item = itemRepository.findById(itemId)
@@ -182,6 +180,7 @@ public class ItemServiceImpl implements ItemService {
         User user = UserMapper.toUser(userService.getById(userId));
         Comment comment = CommentMapper.toComment(commentDto, item, user);
         comment.setCreated(LocalDateTime.now());
+
         return CommentMapper.toCommentDto(commentRepository.save(comment), user);
     }
 }

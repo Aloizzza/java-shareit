@@ -22,7 +22,7 @@ public class Item {
     @Column(name = "id", nullable = false)
     private long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String name;
     private String description;
     private Boolean available;
