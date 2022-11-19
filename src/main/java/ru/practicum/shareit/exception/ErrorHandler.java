@@ -12,7 +12,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequestException(final BadRequest e) {
+    public ErrorResponse handleBadRequestException(final BadRequestException e) {
         log.error("BAD_REQUEST", e);
         return new ErrorResponse(e.getMessage());
     }
