@@ -18,4 +18,6 @@ public interface ItemService {
     ItemDto update(ItemDto itemDto, long id, long userId);
 
     CommentDto createComment(CommentDto commentDto, long itemId, long userId);
+
+    List<ItemDto> findItemsByRequestId(long requestId);
 }

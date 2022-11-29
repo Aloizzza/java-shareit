@@ -23,6 +23,7 @@ public class ItemDto {
     private BookingForItemDto nextBooking;
     @ToString.Exclude
     List<CommentDto> comments;
+    private long requestId;
 
     @Data
     @NoArgsConstructor

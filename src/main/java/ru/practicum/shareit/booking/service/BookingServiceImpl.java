@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -18,7 +19,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.model.BookingStatus.*;
+import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
+import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
 
 @Service
 @RequiredArgsConstructor
@@ -88,40 +90,55 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAllForBooker(long bookerId, String state) {
+    public List<BookingDto> findAllForBooker(int from, int size, long bookerId, String state) {
         userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + bookerId + " не существует"));
 
-        return findBookings(false, state, bookerId)
+        if (from < 0 || size < 0) {
+            throw new BadRequestException("параметры пагинации не могут быть отрицательными");
+        }
+        if (size == 0 && from == 0) {
+            throw new BadRequestException("параметры пагинации не могут быть равны нулю");
+        }
+
+        return findBookings(false, state, bookerId, from, size)
                 .stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingDto> findAllForOwner(long ownerId, String state) {
+    public List<BookingDto> findAllForOwner(int from, int size, long ownerId, String state) {
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + ownerId + " не существует"));
+
+        if (from < 0 || size < 0) {
+            throw new BadRequestException("параметры пагинации не могут быть отрицательными");
+        }
+        if (size == 0 && from == 0) {
+            throw new BadRequestException("параметры пагинации не могут быть равны нулю");
+        }
+
         if (itemRepository.findAllByOwnerId(ownerId).isEmpty()) {
             throw new BadRequestException("у вас нет вещей");
         }
 
-        return findBookings(true, state, ownerId)
+        return findBookings(true, state, ownerId, from, size)
                 .stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
-    public List<Booking> findBookings(boolean isOwner, String state, long id) {
+    public List<Booking> findBookings(boolean isOwner, String state, long id, int from, int size) {
         List<Booking> bookings;
 
         switch (state) {
 
             case "ALL":
                 if (isOwner) {
-                    bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(id);
+                    bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(id, PageRequest.of(from / size, size));
                 } else {
-                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(id);
+                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(id, PageRequest.of(from / size, size));
                 }
                 return bookings;
             case "WAITING":
