@@ -42,8 +42,8 @@ class ItemControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        itemDto = new ItemDto(0L, "name", "description", true, null
-                , null, new ArrayList<>(), 0L);
+        itemDto = new ItemDto(0L, "name", "description", true, null,
+                null, new ArrayList<>(), 0L);
 
         userDto = new UserDto(0L, "name", "user@email.com");
 
@@ -85,8 +85,8 @@ class ItemControllerTest {
     void updateTest() {
         userController.save(userDto);
         itemController.save(itemDto, 1L);
-        ItemDto item = new ItemDto(0L, "new name", "updateDescription", false, null
-                , null, new ArrayList<>(), 0L);
+        ItemDto item = new ItemDto(0L, "new name", "updateDescription", false, null,
+                null, new ArrayList<>(), 0L);
         itemController.update(item, 1L, 1L);
         assertEquals(item.getDescription(), itemController.getById(1L, 1L).getDescription());
     }

@@ -45,17 +45,17 @@ class BookingControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        itemDto = new ItemDto(0L, "name", "description", true, null, null
-                , new ArrayList<>(), 0L);
+        itemDto = new ItemDto(0L, "name", "description", true, null, null,
+                new ArrayList<>(), 0L);
 
         userDto = new UserDto(0L, "name", "user@email.com");
 
         userDto1 = new UserDto(0L, "name", "user1@email.com");
 
-        bookingDto = new BookingDto(0L, 1L
-                , LocalDateTime.of(2022, 12, 30, 12, 30)
-                , LocalDateTime.of(2023, 11, 10, 13, 0), WAITING
-                , itemDto, userDto);
+        bookingDto = new BookingDto(0L, 1L,
+                LocalDateTime.of(2022, 12, 30, 12, 30),
+                LocalDateTime.of(2023, 11, 10, 13, 0), WAITING,
+                itemDto, userDto);
     }
 
     @Test
@@ -108,10 +108,10 @@ class BookingControllerTest {
         UserDto user = userController.save(userDto);
         itemController.save(itemDto, user.getId());
         UserDto user1 = userController.save(userDto1);
-        bookingDto = new BookingDto(0L, 1L
-                , LocalDateTime.of(2022, 12, 30, 12, 30)
-                , LocalDateTime.of(2023, 11, 10, 13, 0), BookingStatus.WAITING
-                , itemDto, userDto1);
+        bookingDto = new BookingDto(0L, 1L,
+                LocalDateTime.of(2022, 12, 30, 12, 30),
+                LocalDateTime.of(2023, 11, 10, 13, 0), BookingStatus.WAITING,
+                itemDto, userDto1);
         BookingDto booking = bookingController.save(bookingDto, user1.getId());
         assertEquals(WAITING, bookingController.getById(booking.getId(), user1.getId()).getStatus());
         bookingController.approve(booking.getId(), true, user.getId());
