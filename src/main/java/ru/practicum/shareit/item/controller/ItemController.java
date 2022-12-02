@@ -41,8 +41,8 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto create(@Valid @RequestBody ItemDto itemDto,
-                          @RequestHeader("X-Sharer-User-Id") long userId) {
+    public ItemDto save(@Valid @RequestBody ItemDto itemDto,
+                        @RequestHeader("X-Sharer-User-Id") long userId) {
         log.info("пользователь с id {} добавил в базу вещь {}", userId, itemDto);
 
         return itemService.create(itemDto, userId);
