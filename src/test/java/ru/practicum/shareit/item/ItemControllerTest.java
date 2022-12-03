@@ -21,8 +21,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.controller.RequestController;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.request.service.RequestService;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -107,7 +105,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void getAllUserItems(){
+    void getAllUserItems() {
         UserDto user = userController.save(userDto);
         ItemDto item = itemController.save(itemDto, 1L);
         assertEquals(1, itemController.getAll(user.getId()).size());
@@ -165,9 +163,9 @@ class ItemControllerTest {
         booking.setId(1L);
         UserDto user2 = userController.save(new UserDto(0L, "name", "email2@email.com"));
         bookingController.save(new BookingDto(0L, 1L,
-                        LocalDateTime.of(2022, 12, 30, 12, 30),
-                        LocalDateTime.of(2023, 11, 10, 13, 0), WAITING,
-                        itemDto, user2), user2.getId());
+                LocalDateTime.of(2022, 12, 30, 12, 30),
+                LocalDateTime.of(2023, 11, 10, 13, 0), WAITING,
+                itemDto, user2), user2.getId());
         bookingController.approve(1L, true, 1L);
         Comment comment1 = CommentMapper.toComment(comment, ItemMapper.toItem(itemDto, null), UserMapper.toUser(userDto));
         User user1 = comment1.getAuthor();
@@ -181,7 +179,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void createEmptyComment(){
+    void createEmptyComment() {
         comment.setText(" ");
         assertThrows(BadRequestException.class, () -> itemController.createComment(comment, 1L, 1L));
     }
@@ -206,7 +204,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void findItemsByRequestId(){
+    void findItemsByRequestId() {
         UserDto user = userController.save(userDto);
         RequestDto request = requestController.save(requestDto, user.getId());
         itemDto.setRequestId(request.getId());
