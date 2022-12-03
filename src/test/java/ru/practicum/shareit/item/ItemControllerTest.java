@@ -5,20 +5,29 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.practicum.shareit.booking.controller.BookingController;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.mapper.CommentMapper;
+import ru.practicum.shareit.item.comment.model.Comment;
+import ru.practicum.shareit.item.comment.repository.CommentRepository;
 import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.request.controller.RequestController;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -31,6 +40,12 @@ class ItemControllerTest {
 
     @Autowired
     private RequestController requestController;
+
+    @Autowired
+    BookingController bookingController;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     private ItemDto itemDto;
 
@@ -116,6 +131,21 @@ class ItemControllerTest {
         userController.save(userDto);
         itemController.save(itemDto, 1L);
         assertEquals(new ArrayList<ItemDto>(), itemController.search("", 1L));
+    }
+
+    @Test
+    void createCommentTest() {
+        UserDto user = userController.save(userDto);
+        ItemDto item = itemController.save(itemDto, 1L);
+        UserDto user2 = userController.save(new UserDto(0L, "name", "email2@email.com"));
+        bookingController.save(new BookingDto(0L, 1L,
+                        LocalDateTime.of(2022, 12, 30, 12, 30),
+                        LocalDateTime.of(2023, 11, 10, 13, 0), WAITING,
+                        itemDto, user2), user2.getId());
+        bookingController.approve(1L, true, 1L);
+        Comment comment1 = CommentMapper.toComment(comment, ItemMapper.toItem(itemDto, null), UserMapper.toUser(userDto));
+
+        assertThrows(BadRequestException.class, () -> itemController.createComment(comment, item.getId(), user2.getId()));
     }
 
     @Test

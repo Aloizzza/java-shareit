@@ -26,7 +26,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleAlreadyExistException(final AlreadyExistsException e) {
+    public ErrorResponse handleAlreadyExistException(final ConflictException e) {
         log.error("CONFLICT", e);
         return new ErrorResponse(e.getMessage());
     }
