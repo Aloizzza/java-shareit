@@ -179,12 +179,12 @@ public class ItemServiceImpl implements ItemService {
 
         Long bookingsCount = bookingRepository.countAllByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
 
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("вещь c идентификатором " + itemId + " не существует"));
+
         if (bookingsCount == null || bookingsCount == 0) {
             throw new BadRequestException("вы еще ни разу не брали эту вещь");
         }
-
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("вещь c идентификатором " + itemId + " не существует"));
 
         User user = UserMapper.toUser(userService.getById(userId));
         Comment comment = CommentMapper.toComment(commentDto, item, user);

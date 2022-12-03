@@ -26,7 +26,6 @@ public class ItemDto {
     private long requestId;
 
     @Data
-    @NoArgsConstructor
     @AllArgsConstructor
     public static class BookingForItemDto {
         private Long id;

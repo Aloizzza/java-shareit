@@ -17,19 +17,13 @@ public class ItemMapper {
 
         if (lastBooking != null) {
             lastBookingToAdd = new ItemDto.BookingForItemDto(
-                    lastBooking.getId(),
-                    lastBooking.getStart(),
-                    lastBooking.getEnd(),
-                    lastBooking.getBooker().getId()
+                    lastBooking.getId(), lastBooking.getStart(), lastBooking.getEnd(), lastBooking.getBooker().getId()
             );
         }
 
         if (nextBooking != null) {
             nextBookingToAdd = new ItemDto.BookingForItemDto(
-                    nextBooking.getId(),
-                    nextBooking.getStart(),
-                    nextBooking.getEnd(),
-                    nextBooking.getBooker().getId()
+                    nextBooking.getId(), nextBooking.getStart(), nextBooking.getEnd(), nextBooking.getBooker().getId()
             );
         }
 
