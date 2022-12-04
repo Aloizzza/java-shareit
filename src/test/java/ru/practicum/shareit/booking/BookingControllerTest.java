@@ -182,4 +182,16 @@ class BookingControllerTest {
         bookingController.save(bookingDto, user1.getId());
         assertThrows(NotFoundException.class, () -> bookingController.getById(1L, 10L));
     }
+
+    @Test
+    void findBookingsForUserWithoutItems() {
+        UserDto user = userController.save(userDto);
+        assertThrows(BadRequestException.class, () -> bookingController.getAllForOwner(0, 20, user.getId(), "ALL"));
+    }
+
+    @Test
+    void  findBookingsWithUnsupportedStatus() {
+        UserDto user = userController.save(userDto);
+        assertThrows(BadRequestException.class, () -> bookingController.getAllForOwner(0, 20, user.getId(), "HI"));
+    }
 }
