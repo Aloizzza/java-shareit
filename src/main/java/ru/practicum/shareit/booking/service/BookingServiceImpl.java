@@ -90,55 +90,41 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAllForBooker(int from, int size, long bookerId, String state) {
+    public List<BookingDto> findAllForBooker(PageRequest pageRequest, long bookerId, String state) {
         userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + bookerId + " не существует"));
 
-        if (from < 0 || size < 0) {
-            throw new BadRequestException("параметры пагинации не могут быть отрицательными");
-        }
-        if (size == 0 && from == 0) {
-            throw new BadRequestException("параметры пагинации не могут быть равны нулю");
-        }
-
-        return findBookings(false, state, bookerId, from, size)
+        return findBookings(false, state, bookerId, pageRequest)
                 .stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingDto> findAllForOwner(int from, int size, long ownerId, String state) {
+    public List<BookingDto> findAllForOwner(PageRequest pageRequest, long ownerId, String state) {
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + ownerId + " не существует"));
-
-        if (from < 0 || size < 0) {
-            throw new BadRequestException("параметры пагинации не могут быть отрицательными");
-        }
-        if (size == 0 && from == 0) {
-            throw new BadRequestException("параметры пагинации не могут быть равны нулю");
-        }
 
         if (itemRepository.findAllByOwnerId(ownerId).isEmpty()) {
             throw new BadRequestException("у вас нет вещей");
         }
 
-        return findBookings(true, state, ownerId, from, size)
+        return findBookings(true, state, ownerId, pageRequest)
                 .stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
-    public List<Booking> findBookings(boolean isOwner, String state, long id, int from, int size) {
+    public List<Booking> findBookings(boolean isOwner, String state, long id, PageRequest pageRequest) {
         List<Booking> bookings;
 
         switch (state) {
 
             case "ALL":
                 if (isOwner) {
-                    bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(id, PageRequest.of(from / size, size));
+                    bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(id, pageRequest);
                 } else {
-                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(id, PageRequest.of(from / size, size));
+                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(id, pageRequest);
                 }
                 return bookings;
             case "WAITING":

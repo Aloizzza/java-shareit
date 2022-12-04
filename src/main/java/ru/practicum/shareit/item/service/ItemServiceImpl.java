@@ -68,22 +68,7 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
-            Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
-                    .stream()
-                    .min(Comparator.comparing(Booking::getEnd))
-                    .orElse(null);
-
-            Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
-                    .stream()
-                    .max(Comparator.comparing(Booking::getStart))
-                    .orElse(null);
-
-            List<CommentDto> commentsDto = commentRepository.getAllByItemId(item.getId())
-                    .stream()
-                    .map(comment -> CommentMapper.toCommentDto(comment, comment.getAuthor()))
-                    .collect(Collectors.toList());
-
-            itemsDto.add(ItemMapper.toItemDto(item, lastBooking, nextBooking, commentsDto));
+            itemsDto.add(addAttributesToItem(item));
         }
 
         return itemsDto;
@@ -99,22 +84,7 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
-            Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
-                    .stream()
-                    .min(Comparator.comparing(Booking::getEnd))
-                    .orElse(null);
-
-            Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
-                    .stream()
-                    .max(Comparator.comparing(Booking::getStart))
-                    .orElse(null);
-
-            List<CommentDto> commentsDto = commentRepository.getAllByItemId(item.getId())
-                    .stream()
-                    .map(comment -> CommentMapper.toCommentDto(comment, comment.getAuthor()))
-                    .collect(Collectors.toList());
-
-            itemsDto.add(ItemMapper.toItemDto(item, lastBooking, nextBooking, commentsDto));
+            itemsDto.add(addAttributesToItem(item));
         }
 
         return itemsDto;
@@ -154,22 +124,7 @@ public class ItemServiceImpl implements ItemService {
         }
         itemRepository.save(item);
 
-        Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
-                .stream()
-                .min(Comparator.comparing(Booking::getEnd))
-                .orElse(null);
-
-        Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
-                .stream()
-                .max(Comparator.comparing(Booking::getStart))
-                .orElse(null);
-
-        List<CommentDto> commentsDto = commentRepository.getAllByItemId(item.getId())
-                .stream()
-                .map(comment -> CommentMapper.toCommentDto(comment, comment.getAuthor()))
-                .collect(Collectors.toList());
-
-        return ItemMapper.toItemDto(item, lastBooking, nextBooking, commentsDto);
+        return addAttributesToItem(item);
     }
 
     public CommentDto createComment(CommentDto commentDto, long itemId, long userId) {
@@ -200,24 +155,28 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
-            Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
-                    .stream()
-                    .min(Comparator.comparing(Booking::getEnd))
-                    .orElse(null);
-
-            Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
-                    .stream()
-                    .max(Comparator.comparing(Booking::getStart))
-                    .orElse(null);
-
-            List<CommentDto> commentsDto = commentRepository.getAllByItemId(item.getId())
-                    .stream()
-                    .map(comment -> CommentMapper.toCommentDto(comment, comment.getAuthor()))
-                    .collect(Collectors.toList());
-
-            itemsDto.add(ItemMapper.toItemDto(item, lastBooking, nextBooking, commentsDto));
+            itemsDto.add(addAttributesToItem(item));
         }
 
         return itemsDto;
+    }
+
+    private ItemDto addAttributesToItem(Item item) {
+        Booking lastBooking = bookingRepository.findAllByItemIdAndStartBeforeOrderByStartDesc(item.getId(), LocalDateTime.now())
+                .stream()
+                .min(Comparator.comparing(Booking::getEnd))
+                .orElse(null);
+
+        Booking nextBooking = bookingRepository.findAllByItemIdAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now())
+                .stream()
+                .max(Comparator.comparing(Booking::getStart))
+                .orElse(null);
+
+        List<CommentDto> commentsDto = commentRepository.getAllByItemId(item.getId())
+                .stream()
+                .map(comment -> CommentMapper.toCommentDto(comment, comment.getAuthor()))
+                .collect(Collectors.toList());
+
+        return ItemMapper.toItemDto(item, lastBooking, nextBooking, commentsDto);
     }
 }

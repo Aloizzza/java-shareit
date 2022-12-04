@@ -1,10 +1,10 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -41,46 +41,47 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestDto> findAllForOwner(long userId) {
+    public List<RequestDto> findAllForOwner(PageRequest pageRequest, long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует."));
 
-        return requestRepository.findAllByRequestorIdOrderByCreatedDesc(userId)
-                .stream()
-                .map((Request request) -> RequestMapper.toRequestDto(request, new ArrayList<>()))
-                .peek(itemRequestDtoOutput ->
-                        itemRequestDtoOutput.setItems(
-                                itemRepository.findItemsByRequestId(itemRequestDtoOutput.getId())
-                                        .stream()
-                                        .map((Item item) -> ItemMapper.toItemDto(item, null, null, null))
-                                        .collect(Collectors.toList())))
-                .collect(Collectors.toList());
+        List<Request> requests = requestRepository.findAllByRequestorIdOrderByCreatedDesc(pageRequest, userId);
+        List<Item> items = itemRepository.findAllWithNonNullRequest();
+        List<RequestDto> ownerRequests = new ArrayList<>();
+
+        for (Request r : requests) {
+            List<ItemDto> itemsFofRequest = new ArrayList<>();
+            for (Item i : items) {
+                if (r.getId() == i.getRequest().getId()) {
+                    itemsFofRequest.add(ItemMapper.toItemDto(i, null, null, new ArrayList<>()));
+                }
+            }
+            ownerRequests.add(RequestMapper.toRequestDto(r, itemsFofRequest));
+        }
+
+        return ownerRequests;
     }
 
     @Override
-    public List<RequestDto> findAll(int from, int size, long userId) {
+    public List<RequestDto> findAll(PageRequest pageRequest, long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует."));
-        if (from < 0 || size < 0) {
-            throw new BadRequestException("параметры пагинации не могут быть отрицательными.");
-        }
-        if (size == 0 && from == 0) {
-            throw new BadRequestException("параметры пагинации не могут быть равны нулю.");
+
+        List<Request> requests = requestRepository.findAllByRequestorIdNotOrderByCreatedDesc(pageRequest, userId);
+        List<Item> items = itemRepository.findAllWithNonNullRequest();
+        List<RequestDto> userRequests = new ArrayList<>();
+
+        for (Request r : requests) {
+            List<ItemDto> itemsFofRequest = new ArrayList<>();
+            for (Item i : items) {
+                if (r.getId() == i.getRequest().getId()) {
+                    itemsFofRequest.add(ItemMapper.toItemDto(i, null, null, new ArrayList<>()));
+                }
+            }
+            userRequests.add(RequestMapper.toRequestDto(r, itemsFofRequest));
         }
 
-        Pageable pageable = Pageable.ofSize(size);
-
-        return requestRepository.findAll(pageable)
-                .stream()
-                .filter(request -> !(request.getRequestor().getId() == userId))
-                .map(request -> RequestMapper.toRequestDto(request, new ArrayList<>()))
-                .peek(requestDto ->
-                        requestDto.setItems(
-                                itemRepository.findItemsByRequestId(requestDto.getId())
-                                        .stream()
-                                        .map((Item item) -> ItemMapper.toItemDto(item, null, null, null))
-                                        .collect(Collectors.toList())))
-                .collect(Collectors.toList());
+        return userRequests;
     }
 
     @Override

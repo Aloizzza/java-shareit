@@ -53,7 +53,7 @@ class RequestControllerTest {
     void getAllByOwnerTest() {
         UserDto user = userController.save(userDto);
         requestController.save(itemRequestDto, user.getId());
-        assertEquals(1, requestController.findAllForOwner(user.getId()).size());
+        assertEquals(1, requestController.findAllForOwner(0, 20, user.getId()).size());
     }
 
     @Test
@@ -66,6 +66,7 @@ class RequestControllerTest {
         UserDto user = userController.save(userDto);
         requestController.save(itemRequestDto, user.getId());
         assertEquals(0, requestController.findAll(0, 10, user.getId()).size());
+
         UserDto user2 = userController.save(new UserDto(0L, "name", "user1@email.com"));
         assertEquals(1, requestController.findAll(0, 10, user2.getId()).size());
     }
