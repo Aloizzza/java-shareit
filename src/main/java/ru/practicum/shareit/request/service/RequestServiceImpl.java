@@ -44,20 +44,8 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует."));
 
         List<Request> requests = requestRepository.findAllByRequestorIdOrderByCreatedDesc(pageRequest, userId);
-        List<Item> items = itemRepository.findAllWithNonNullRequest();
-        List<RequestDto> ownerRequests = new ArrayList<>();
 
-        for (Request r : requests) {
-            List<ItemDto> itemsFofRequest = new ArrayList<>();
-            for (Item i : items) {
-                if (r.getId() == i.getRequest().getId()) {
-                    itemsFofRequest.add(ItemMapper.toItemDto(i, null, null, new ArrayList<>()));
-                }
-            }
-            ownerRequests.add(RequestMapper.toRequestDto(r, itemsFofRequest));
-        }
-
-        return ownerRequests;
+        return addItemsToRequest(requests);
     }
 
     @Override
@@ -66,20 +54,8 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует."));
 
         List<Request> requests = requestRepository.findAllByRequestorIdNotOrderByCreatedDesc(pageRequest, userId);
-        List<Item> items = itemRepository.findAllWithNonNullRequest();
-        List<RequestDto> userRequests = new ArrayList<>();
 
-        for (Request r : requests) {
-            List<ItemDto> itemsFofRequest = new ArrayList<>();
-            for (Item i : items) {
-                if (r.getId() == i.getRequest().getId()) {
-                    itemsFofRequest.add(ItemMapper.toItemDto(i, null, null, new ArrayList<>()));
-                }
-            }
-            userRequests.add(RequestMapper.toRequestDto(r, itemsFofRequest));
-        }
-
-        return userRequests;
+        return addItemsToRequest(requests);
     }
 
     @Override
@@ -98,5 +74,22 @@ public class RequestServiceImpl implements RequestService {
                 .collect(Collectors.toList()));
 
         return requestDto;
+    }
+
+    private List<RequestDto> addItemsToRequest(List<Request> requests) {
+        List<Item> items = itemRepository.findAllWithNonNullRequest();
+        List<RequestDto> ownerRequests = new ArrayList<>();
+
+        for (Request r : requests) {
+            List<ItemDto> itemsFofRequest = new ArrayList<>();
+            for (Item i : items) {
+                if (r.getId() == i.getRequest().getId()) {
+                    itemsFofRequest.add(ItemMapper.toItemDto(i, null, null, new ArrayList<>()));
+                }
+            }
+            ownerRequests.add(RequestMapper.toRequestDto(r, itemsFofRequest));
+        }
+
+        return ownerRequests;
     }
 }
