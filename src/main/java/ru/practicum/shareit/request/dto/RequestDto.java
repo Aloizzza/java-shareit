@@ -13,7 +13,6 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 public class RequestDto {
     private long id;
     @NotBlank

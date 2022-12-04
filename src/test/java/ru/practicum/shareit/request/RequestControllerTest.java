@@ -7,12 +7,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.controller.RequestController;
 import ru.practicum.shareit.request.dto.RequestDto;
+import ru.practicum.shareit.request.mapper.RequestMapper;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,7 +48,34 @@ class RequestControllerTest {
     void createTest() {
         UserDto user = userController.save(userDto);
         RequestDto itemRequest = requestController.save(itemRequestDto, user.getId());
+        List<ItemDto> items = itemRequest.getItems();
+        Request request = RequestMapper.toRequest(itemRequest);
+        User user1 = request.getRequestor();
+
         assertEquals(1L, requestController.findById(itemRequest.getId(), user.getId()).getId());
+    }
+
+    @Test
+    void findWithItemTest() {
+        UserDto user = userController.save(userDto);
+        UserDto user2 = userController.save(new UserDto(0L, "name", "user2@email.com"));
+        RequestDto itemRequest = requestController.save(itemRequestDto, user.getId());
+        Item item = new Item(0L, "item", "desc", true, UserMapper.toUser(user2),
+                RequestMapper.toRequest(itemRequest));
+
+        assertEquals(1, requestController.findAll(0, 20, user2.getId()).size());
+        assertEquals(1, requestController.findAllForOwner(0, 20, user.getId()).size());
+    }
+
+    @Test
+    void findWithBadPagination() {
+        UserDto user = userController.save(userDto);
+        UserDto user2 = userController.save(new UserDto(0L, "name", "user2@email.com"));
+        RequestDto itemRequest = requestController.save(itemRequestDto, user.getId());
+        Item item = new Item(0L, "item", "desc", true, UserMapper.toUser(user2),
+                RequestMapper.toRequest(itemRequest));
+
+        assertThrows(BadRequestException.class, () -> requestController.findAllForOwner(-1, 0, user.getId()).size());
     }
 
     @Test
