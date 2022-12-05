@@ -23,14 +23,28 @@ public class ItemDto {
     private BookingForItemDto nextBooking;
     @ToString.Exclude
     List<CommentDto> comments;
+    private long requestId;
 
     @Data
-    @NoArgsConstructor
     @AllArgsConstructor
     public static class BookingForItemDto {
         private Long id;
         private LocalDateTime start;
         private LocalDateTime end;
         private Long bookerId;
+    }
+
+    @Override
+    public String toString() {
+        return "ItemDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", available=" + available +
+                ", lastBooking=" + lastBooking +
+                ", nextBooking=" + nextBooking +
+                ", comments=" + comments +
+                ", requestId=" + requestId +
+                '}';
     }
 }

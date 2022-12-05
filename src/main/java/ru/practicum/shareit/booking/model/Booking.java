@@ -42,5 +42,17 @@ public class Booking {
         this.end = end;
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "id=" + id +
+                ", start=" + start +
+                ", end=" + end +
+                ", item=" + item.getId() +
+                ", booker=" + booker.getId() +
+                ", status=" + status +
+                '}';
+    }
 }
 

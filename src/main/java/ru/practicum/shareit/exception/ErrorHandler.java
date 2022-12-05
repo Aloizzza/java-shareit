@@ -24,13 +24,6 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleAlreadyExistException(final AlreadyExistsException e) {
-        log.error("CONFLICT", e);
-        return new ErrorResponse(e.getMessage());
-    }
-
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         log.error("INTERNAL_SERVER_ERROR", e);

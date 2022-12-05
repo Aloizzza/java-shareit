@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -18,7 +19,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.model.BookingStatus.*;
+import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
+import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
 
 @Service
 @RequiredArgsConstructor
@@ -88,40 +90,41 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAllForBooker(long bookerId, String state) {
+    public List<BookingDto> findAllForBooker(PageRequest pageRequest, long bookerId, String state) {
         userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + bookerId + " не существует"));
 
-        return findBookings(false, state, bookerId)
+        return findBookings(false, state, bookerId, pageRequest)
                 .stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingDto> findAllForOwner(long ownerId, String state) {
+    public List<BookingDto> findAllForOwner(PageRequest pageRequest, long ownerId, String state) {
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + ownerId + " не существует"));
+
         if (itemRepository.findAllByOwnerId(ownerId).isEmpty()) {
             throw new BadRequestException("у вас нет вещей");
         }
 
-        return findBookings(true, state, ownerId)
+        return findBookings(true, state, ownerId, pageRequest)
                 .stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
-    public List<Booking> findBookings(boolean isOwner, String state, long id) {
+    public List<Booking> findBookings(boolean isOwner, String state, long id, PageRequest pageRequest) {
         List<Booking> bookings;
 
         switch (state) {
 
             case "ALL":
                 if (isOwner) {
-                    bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(id);
+                    bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(id, pageRequest);
                 } else {
-                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(id);
+                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(id, pageRequest);
                 }
                 return bookings;
             case "WAITING":

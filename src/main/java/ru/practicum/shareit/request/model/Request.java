@@ -1,6 +1,8 @@
 package ru.practicum.shareit.request.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
@@ -10,8 +12,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "requests")
-public class ItemRequest {
+public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
