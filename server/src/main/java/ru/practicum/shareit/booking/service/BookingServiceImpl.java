@@ -105,7 +105,7 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + ownerId + " не существует"));
 
-        if (itemRepository.findAllByOwnerId(ownerId).isEmpty()) {
+        if (itemRepository.findAllByOwnerIdOrderByIdDesc(ownerId).isEmpty()) {
             throw new BadRequestException("у вас нет вещей");
         }
 
