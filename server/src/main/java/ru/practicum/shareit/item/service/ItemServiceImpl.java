@@ -63,7 +63,7 @@ public class ItemServiceImpl implements ItemService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("пользователь c идентификатором " + userId + " не существует"));
 
-        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        List<Item> items = itemRepository.findAllByOwnerIdOrderByIdDesc(userId);
 
         List<ItemDto> itemsDto = new ArrayList<>();
 
