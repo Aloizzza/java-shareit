@@ -1,12 +1,5 @@
-logging:
-    level:
-        org:
-            springframework:
-                orm:
-                    jpa: INFO
-                    jpa.JpaTransactionManager: DEBUG
-                transaction: INFO
-                transaction.interceptor: TRACE
+server:
+    port: 9090
 spring:
     config:
         activate:
@@ -18,7 +11,7 @@ spring:
         username: test
     jpa:
         hibernate:
-            ddl-auto: none
+            ddl-auto: create-drop
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQL10Dialect
