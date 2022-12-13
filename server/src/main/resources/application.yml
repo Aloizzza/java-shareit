@@ -1,0 +1,18 @@
+server:
+    port: 9090
+spring:
+    datasource:
+        driverClassName: org.postgresql.Driver
+        password: root
+        url: jdbc:postgresql://localhost:5432/shareit
+        username: root
+    jpa:
+        hibernate:
+            ddl-auto: create-drop
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQL10Dialect
+                format_sql: true
+    sql:
+        init:
+            mode: always
