@@ -7,7 +7,6 @@ import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -41,7 +40,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto save(@Valid @RequestBody ItemDto itemDto,
+    public ItemDto save(@RequestBody ItemDto itemDto,
                         @RequestHeader("X-Sharer-User-Id") long userId) {
         log.info("пользователь с id {} добавил в базу вещь {}", userId, itemDto);
 
@@ -58,7 +57,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+    public CommentDto createComment(@RequestBody CommentDto commentDto,
                                     @PathVariable Long itemId,
                                     @RequestHeader("X-Sharer-User-Id") long userId) {
         log.info("пользователь с id {} оставил отзыв на вещь с id {}: {}", userId, itemId, commentDto);

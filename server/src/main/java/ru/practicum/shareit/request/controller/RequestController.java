@@ -7,7 +7,6 @@ import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.service.RequestService;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,7 +16,7 @@ public class RequestController {
     private final RequestService requestService;
 
     @PostMapping
-    public RequestDto save(@Valid @RequestBody RequestDto itemRequestDto,
+    public RequestDto save(@RequestBody RequestDto itemRequestDto,
                            @RequestHeader("X-Sharer-User-Id") long userId) {
         return requestService.add(itemRequestDto, userId);
     }
