@@ -3,8 +3,6 @@ package ru.practicum.shareit.item.dto;
 import lombok.*;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,11 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 public class ItemDto {
     private long id;
-    @NotEmpty
     private String name;
-    @NotEmpty
     private String description;
-    @NotNull
     private Boolean available;
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
