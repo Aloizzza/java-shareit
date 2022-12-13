@@ -6,9 +6,16 @@ spring:
         password: root
         url: jdbc:postgresql://localhost:5432/shareit
         username: root
+    h2:
+        console:
+            enabled: false
+            path: /h2-console
+            settings:
+                trace: false
+                web-allow-others: false
     jpa:
-        hibernate:
-            ddl-auto: none
+        show-sql: true
+        open-in-view: false
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQL10Dialect
@@ -16,3 +23,6 @@ spring:
     sql:
         init:
             mode: always
+    config:
+        activate:
+            on-profile: ci,test
